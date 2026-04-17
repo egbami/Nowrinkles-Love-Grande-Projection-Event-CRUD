@@ -121,12 +121,12 @@ export default function HeroSection({ visible }: HeroSectionProps) {
         </p>
 
         {/* Titre géant */}
-        <div className="overflow-hidden leading-[0.85] mt-4">
+        <div className="overflow-hidden leading-[0.85] mt-4 w-full">
           <div
             ref={line1Ref}
-            className="font-playfair font-black uppercase tracking-tighter"
+            className="font-playfair font-black uppercase tracking-tighter whitespace-nowrap"
             style={{
-              fontSize: 'clamp(4.5rem, 16vw, 15rem)',
+              fontSize: 'clamp(3rem, 11vw, 12rem)',
               color: 'var(--graphite)',
             }}
           >
@@ -134,12 +134,12 @@ export default function HeroSection({ visible }: HeroSectionProps) {
           </div>
         </div>
 
-        <div className="overflow-hidden leading-[0.85] ml-[10vw]">
+        <div className="overflow-hidden leading-[0.85] ml-4 md:ml-[8vw] w-full">
           <div
             ref={line2Ref}
-            className="font-playfair font-black uppercase italic tracking-tighter"
+            className="font-playfair font-black uppercase italic tracking-tighter whitespace-nowrap"
             style={{
-              fontSize: 'clamp(4.5rem, 16vw, 15rem)',
+              fontSize: 'clamp(3rem, 11vw, 12rem)',
               WebkitTextStroke: '2px var(--lavender)',
               color: 'transparent',
             }}

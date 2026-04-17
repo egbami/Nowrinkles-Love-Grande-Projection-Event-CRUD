@@ -118,20 +118,19 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         {/* Titre Immense (Lando Norris style) */}
         <div ref={titleRef} className="flex flex-col items-center leading-[0.85] opacity-0 w-full overflow-hidden">
           <span
-            className="font-playfair font-bold uppercase tracking-tighter"
+            className="font-playfair font-bold uppercase tracking-tighter whitespace-nowrap"
             style={{
-              fontSize: 'clamp(3rem, 12vw, 9rem)',
+              fontSize: 'clamp(3rem, 11vw, 12rem)',
               color: 'var(--graphite)',
             }}
           >
             La Grande
           </span>
           <span
-            className="font-playfair font-bold uppercase italic tracking-tighter"
+            className="font-playfair font-bold uppercase italic tracking-tighter whitespace-nowrap ml-4 md:ml-[8vw]"
             style={{
-              fontSize: 'clamp(3rem, 12vw, 9rem)',
+              fontSize: 'clamp(3rem, 11vw, 12rem)',
               color: 'var(--lavender)',
-              marginLeft: '15%',
             }}
           >
             Projection
