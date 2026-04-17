@@ -9,7 +9,8 @@ export async function GET() {
   try {
     const total = await prisma.participant.count()
     const now   = new Date()
-    const ouvert = now >= DATE_DEBUT && now <= DATE_FIN && total < MAX_PARTICIPANTS
+    // Les inscriptions sont ouvertes si on est AVANT ou LE 31 Mai 2026 à 23h59m59, ET qu'on a moins de 200 inscrits.
+    const ouvert = now <= DATE_FIN && total < MAX_PARTICIPANTS
 
     return NextResponse.json({
       total,

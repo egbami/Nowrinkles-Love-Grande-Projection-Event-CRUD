@@ -29,9 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
-    if (now < DATE_DEBUT) {
-      return NextResponse.json({ error: 'Les inscriptions ne sont pas encore ouvertes. Rendez-vous le 27 avril 2026.' }, { status: 403 })
-    }
+    // Supprimé : la vérification DATE_DEBUT, car le client a demandé l'ouverture immédiate.
     if (now > DATE_FIN) {
       return NextResponse.json({ error: 'Les inscriptions sont closes depuis le 31 mai 2026.' }, { status: 403 })
     }
