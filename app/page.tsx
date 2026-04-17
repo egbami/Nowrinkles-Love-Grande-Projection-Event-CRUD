@@ -1,65 +1,153 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import dynamic from 'next/dynamic'
+import LoadingScreen from '@/components/LoadingScreen'
+import SmoothScrollProvider from '@/components/SmoothScrollProvider'
+import HeroSection from '@/components/HeroSection'
+
+// Import dynamique (SSR désactivé pour les composants avec animations)
+const InscriptionForm = dynamic(() => import('@/components/InscriptionForm'), {
+  ssr: false,
+})
+
+export default function HomePage() {
+  const [loaded, setLoaded] = useState(false)
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      {/* Écran de chargement */}
+      {!loaded && <LoadingScreen onComplete={() => setLoaded(true)} />}
+
+      {/* Contenu principal */}
+      <SmoothScrollProvider>
+        <main
+          style={{
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.4s ease',
+          }}
+        >
+          {/* Section 1 : Hero */}
+          <HeroSection visible={loaded} />
+
+          {/* Séparateur */}
+          <div
+            className="mx-6 md:mx-14"
+            style={{ height: '1px', background: 'rgba(28,28,46,0.08)' }}
+          />
+
+          {/* Section 2 : À propos / Citation */}
+          <AboutSection />
+
+          {/* Section 3 : Formulaire d'inscription */}
+          <InscriptionForm />
+
+          {/* Footer */}
+          <Footer />
+        </main>
+      </SmoothScrollProvider>
+    </>
+  )
+}
+
+/* ─── Section À propos ──────────────────────────────────────────────────────── */
+function AboutSection() {
+  return (
+    <section
+      className="py-24 md:py-36 px-6 md:px-14"
+      style={{ background: 'var(--bg)' }}
+    >
+      <div className="max-w-4xl mx-auto text-center">
+        <p
+          className="font-source text-[10px] tracking-[0.4em] uppercase mb-8"
+          style={{ color: 'var(--lavender)' }}
+        >
+          ✦ L&apos;événement
+        </p>
+
+        {/* Citation biblique */}
+        <blockquote className="mb-14">
+          <p
+            className="font-playfair italic leading-relaxed"
+            style={{
+              fontSize: 'clamp(1.4rem, 4vw, 2.4rem)',
+              color: 'var(--graphite)',
+            }}
+          >
+            &ldquo; Car Dieu a tant aimé le monde qu&apos;il a donné son Fils unique,
+            afin que quiconque croit en lui ne périsse point, mais qu&apos;il ait
+            la vie éternelle. &rdquo;
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <footer
+            className="mt-4 font-source text-sm tracking-widest uppercase"
+            style={{ color: 'var(--muted)' }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            — Jean 3:16
+          </footer>
+        </blockquote>
+
+        <div className="cross-line max-w-xs mx-auto mb-14">
+          <span style={{ color: 'var(--lavender)', fontSize: '1rem' }}>✝</span>
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Description */}
+        <p
+          className="font-source text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
+          style={{ color: 'var(--muted)', lineHeight: 1.9 }}
+        >
+          <strong style={{ color: 'var(--graphite)' }}>La Grande Projection</strong> est
+          un événement chrétien organisé par{' '}
+          <strong style={{ color: 'var(--graphite)' }}>Nowrinkles Love</strong>.
+          Un moment unique de communion, de foi et de partage.
+          Inscrivez-vous dès maintenant — les places sont limitées à{' '}
+          <strong style={{ color: 'var(--gold)' }}>200 participants</strong>.
+        </p>
+
+        {/* Infos pratiques */}
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
+          {[
+            { label: 'Inscription', value: '27 Avr — 31 Mai', icon: '📅' },
+            { label: 'Places disponibles', value: '200 max', icon: '🎟' },
+            { label: 'Entrée', value: 'Sur invitation QR', icon: '📲' },
+          ].map(({ label, value, icon }) => (
+            <div key={label} className="text-center">
+              <div className="text-2xl mb-3">{icon}</div>
+              <p
+                className="font-source text-[10px] tracking-[0.3em] uppercase mb-1"
+                style={{ color: 'var(--muted)' }}
+              >
+                {label}
+              </p>
+              <p
+                className="font-playfair font-semibold text-lg"
+                style={{ color: 'var(--graphite)' }}
+              >
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Footer ────────────────────────────────────────────────────────────────── */
+function Footer() {
+  return (
+    <footer
+      className="py-10 px-6 md:px-14 text-center border-t"
+      style={{
+        borderColor: 'rgba(28,28,46,0.08)',
+        background: 'var(--bg)',
+      }}
+    >
+      <p
+        className="font-source text-xs tracking-widest uppercase"
+        style={{ color: 'var(--muted)' }}
+      >
+        © 2026 Nowrinkles Love — Fait avec ✝ à Cotonou, Bénin
+      </p>
+    </footer>
+  )
 }
