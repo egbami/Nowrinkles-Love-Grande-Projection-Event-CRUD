@@ -9,12 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#FFFFE4',
-        lavender: '#92A9E1',
-        graphite: '#1C1C2E',
-        gold: '#C9A227',
-        'gold-light': '#E8C547',
-        'text-muted': '#5A5A7A',
+        bg: 'var(--bg)',
+        lavender: 'var(--lavender)',
+        graphite: 'var(--graphite)',
+        gold: 'var(--gold)',
+        muted: 'var(--muted)',
       },
       fontFamily: {
         playfair: ['var(--font-playfair)', 'Georgia', 'serif'],

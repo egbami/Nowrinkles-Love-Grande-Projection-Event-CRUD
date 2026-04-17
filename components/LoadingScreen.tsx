@@ -31,34 +31,40 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
       // État initial
-      gsap.set([logoRef.current, taglineRef.current, titleRef.current, progressRef.current], {
-        autoAlpha: 0,
-        y: 24,
-      })
+      gsap.set(logoRef.current, { autoAlpha: 0, scale: 0.8 })
+      gsap.set(taglineRef.current, { autoAlpha: 0, y: 10 })
+      gsap.set(titleRef.current?.children ? Array.from(titleRef.current.children) : [], { y: '100%', autoAlpha: 0 })
+      gsap.set(progressRef.current, { autoAlpha: 0 })
 
       tl
         // Apparition logo
-        .to(logoRef.current, { autoAlpha: 1, y: 0, duration: 1 }, 0.4)
+        .to(logoRef.current, { autoAlpha: 1, scale: 1, duration: 1.2, ease: 'expo.out' }, 0.2)
         // Tagline
-        .to(taglineRef.current, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.9)
-        // Titre
-        .to(titleRef.current, { autoAlpha: 1, y: 0, duration: 0.9 }, 1.2)
+        .to(taglineRef.current, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, 0.5)
+        // Titre masking
+        .to(titleRef.current?.children ? Array.from(titleRef.current.children) : [], { 
+          y: '0%', 
+          autoAlpha: 1, 
+          duration: 1.2, 
+          stagger: 0.1, 
+          ease: 'expo.out' 
+        }, 0.7)
         // Barre de progression
-        .to(progressRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, 1.6)
+        .to(progressRef.current, { autoAlpha: 1, duration: 0.8 }, 1.2)
         // Remplissage de la barre + compteur
         .to(
           barRef.current,
           {
             width: '100%',
             duration: 2,
-            ease: 'power1.inOut',
+            ease: 'expo.inOut',
             onUpdate() {
               if (percentRef.current) {
-                percentRef.current.textContent = `${Math.round(this.progress() * 100)}%`
+                percentRef.current.textContent = `${Math.round(this.progress() * 100)}`
               }
             },
           },
-          1.8
+          1.5
         )
         // Slide vers le haut → révèle la page
         .to(
@@ -81,35 +87,20 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-      style={{ backgroundColor: 'var(--loader-bg)' }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
+      style={{ backgroundColor: 'var(--bg)' }}
     >
-      {/* Rayons lumineux décoratifs */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
-        {Array.from({ length: RAY_COUNT }).map((_, i) => (
-          <div
-            key={i}
-            className="loader-ray"
-            style={{
-              height: `${35 + Math.random() * 30}vh`,
-              transform: `translate(-50%, 0) rotate(${(360 / RAY_COUNT) * i}deg)`,
-              animationDelay: `${i * 0.35}s`,
-            }}
-          />
-        ))}
-      </div>
-
       {/* Contenu centré */}
-      <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center w-full max-w-4xl">
 
         {/* Logo */}
-        <div ref={logoRef}>
-          <div className="relative w-24 h-24 md:w-32 md:h-32">
+        <div ref={logoRef} className="opacity-0">
+          <div className="relative w-20 h-20 md:w-28 md:h-28">
             <Image
               src="/logo.png"
               alt="Nowrinkles Love"
               fill
-              className="object-contain drop-shadow-[0_0_40px_rgba(201,162,39,0.5)]"
+              className="object-contain"
               priority
             />
           </div>
@@ -118,28 +109,29 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         {/* Nowrinkles Love */}
         <p
           ref={taglineRef}
-          className="font-source text-[10px] md:text-xs tracking-[0.45em] uppercase"
-          style={{ color: 'var(--lavender)' }}
+          className="font-source text-[10px] md:text-xs tracking-[0.45em] uppercase opacity-0"
+          style={{ color: 'var(--muted)' }}
         >
-          Nowrinkles Love présente
+          Présente
         </p>
 
-        {/* Titre */}
-        <div ref={titleRef} className="flex flex-col items-center gap-1">
+        {/* Titre Immense (Lando Norris style) */}
+        <div ref={titleRef} className="flex flex-col items-center leading-[0.85] opacity-0 w-full overflow-hidden">
           <span
-            className="font-playfair font-bold leading-none"
+            className="font-playfair font-bold uppercase tracking-tighter"
             style={{
-              fontSize: 'clamp(2.8rem, 10vw, 6rem)',
-              color: 'var(--bg)',
+              fontSize: 'clamp(3rem, 12vw, 9rem)',
+              color: 'var(--graphite)',
             }}
           >
             La Grande
           </span>
           <span
-            className="font-playfair font-bold italic leading-none"
+            className="font-playfair font-bold uppercase italic tracking-tighter"
             style={{
-              fontSize: 'clamp(2.8rem, 10vw, 6rem)',
-              color: 'var(--gold)',
+              fontSize: 'clamp(3rem, 12vw, 9rem)',
+              color: 'var(--lavender)',
+              marginLeft: '15%',
             }}
           >
             Projection
@@ -147,25 +139,25 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
         </div>
 
         {/* Barre de chargement */}
-        <div ref={progressRef} className="w-56 md:w-72 mt-6">
+        <div ref={progressRef} className="w-[80%] max-w-md mt-10 opacity-0 flex flex-col items-center gap-4">
           <div
-            className="relative h-px overflow-hidden"
-            style={{ background: 'rgba(255,255,228,0.1)' }}
+            className="relative h-1 w-full overflow-hidden rounded-full"
+            style={{ background: 'rgba(42,42,42,0.1)' }}
           >
             <div
               ref={barRef}
-              className="absolute left-0 top-0 h-full"
+              className="absolute left-0 top-0 h-full rounded-full"
               style={{
-                background: 'linear-gradient(90deg, var(--lavender), var(--gold))',
+                background: 'var(--graphite)',
                 width: '0%',
               }}
             />
           </div>
           <p
-            className="mt-2 text-center font-source text-[10px] tracking-widest"
-            style={{ color: 'rgba(255,255,228,0.3)' }}
+            className="font-playfair font-bold italic text-3xl"
+            style={{ color: 'var(--graphite)' }}
           >
-            <span ref={percentRef}>0%</span>
+            <span ref={percentRef}>0</span>%
           </p>
         </div>
       </div>

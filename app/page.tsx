@@ -100,18 +100,18 @@ function AboutSection() {
           <strong style={{ color: 'var(--graphite)' }}>Nowrinkles Love</strong>.
           Un moment unique de communion, de foi et de partage.
           Inscrivez-vous dès maintenant — les places sont limitées à{' '}
-          <strong style={{ color: 'var(--gold)' }}>200 participants</strong>.
+          <strong style={{ color: 'var(--lavender)' }}>200 participants</strong>.
         </p>
 
         {/* Infos pratiques */}
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
           {[
-            { label: 'Inscription', value: '27 Avr — 31 Mai', icon: '📅' },
-            { label: 'Places disponibles', value: '200 max', icon: '🎟' },
-            { label: 'Entrée', value: 'Sur invitation QR', icon: '📲' },
+            { label: 'Inscription', value: '27 Avr — 31 Mai', icon: '✦' },
+            { label: 'Places disponibles', value: '200 max', icon: '✦' },
+            { label: 'Entrée', value: 'Sur invitation QR', icon: '✦' },
           ].map(({ label, value, icon }) => (
             <div key={label} className="text-center">
-              <div className="text-2xl mb-3">{icon}</div>
+              <div className="text-2xl mb-3" style={{ color: 'var(--lavender)' }}>{icon}</div>
               <p
                 className="font-source text-[10px] tracking-[0.3em] uppercase mb-1"
                 style={{ color: 'var(--muted)' }}

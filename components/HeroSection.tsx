@@ -33,32 +33,35 @@ export default function HeroSection({ visible }: HeroSectionProps) {
       const tl = gsap.timeline({ defaults: { ease: 'power4.out' } })
 
       // État initial
-      gsap.set(
-        [navRef.current, tagRef.current, line1Ref.current,
-         line2Ref.current, dividerRef.current, metaRef.current,
-         ctaRef.current, scrollRef.current],
-        { autoAlpha: 0, y: 30 }
-      )
+      gsap.set([navRef.current, tagRef.current, dividerRef.current, metaRef.current, ctaRef.current, scrollRef.current], { 
+        autoAlpha: 0, 
+        y: 20 
+      })
+      gsap.set([line1Ref.current, line2Ref.current], { yPercent: 100 })
 
       tl
-        .to(navRef.current,      { autoAlpha: 1, y: 0, duration: 0.7 }, 0)
-        .to(tagRef.current,      { autoAlpha: 1, y: 0, duration: 0.8 }, 0.15)
-        .to(line1Ref.current,    { autoAlpha: 1, y: 0, duration: 1.0 }, 0.3)
-        .to(line2Ref.current,    { autoAlpha: 1, y: 0, duration: 1.0 }, 0.45)
-        .to(dividerRef.current,  { autoAlpha: 1, y: 0, duration: 0.7 }, 0.65)
-        .to(metaRef.current,     { autoAlpha: 1, y: 0, duration: 0.8 }, 0.75)
-        .to(ctaRef.current,      { autoAlpha: 1, y: 0, duration: 0.8 }, 0.9)
-        .to(scrollRef.current,   { autoAlpha: 1, y: 0, duration: 0.6 }, 1.1)
+        .to(navRef.current,      { autoAlpha: 1, y: 0, duration: 1 }, 0.2)
+        .to(tagRef.current,      { autoAlpha: 1, y: 0, duration: 1 }, 0.4)
+        .to([line1Ref.current, line2Ref.current], { 
+          yPercent: 0, 
+          duration: 1.4, 
+          stagger: 0.15,
+          ease: 'expo.out' 
+        }, 0.5)
+        .to(dividerRef.current,  { autoAlpha: 1, y: 0, duration: 1 }, 0.8)
+        .to(metaRef.current,     { autoAlpha: 1, y: 0, duration: 1 }, 0.9)
+        .to(ctaRef.current,      { autoAlpha: 1, y: 0, duration: 1 }, 1.1)
+        .to(scrollRef.current,   { autoAlpha: 1, y: 0, duration: 1 }, 1.4)
 
       // Parallaxe au scroll sur le titre
       gsap.to([line1Ref.current, line2Ref.current], {
-        yPercent: -20,
+        yPercent: -40,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: 1.5,
+          scrub: 1,
         },
       })
     })
@@ -118,29 +121,27 @@ export default function HeroSection({ visible }: HeroSectionProps) {
         </p>
 
         {/* Titre géant */}
-        <div className="overflow-hidden leading-[0.88]">
+        <div className="overflow-hidden leading-[0.85] mt-4">
           <div
             ref={line1Ref}
-            className="font-playfair font-black uppercase"
+            className="font-playfair font-black uppercase tracking-tighter"
             style={{
-              fontSize: 'clamp(4rem, 14vw, 13rem)',
+              fontSize: 'clamp(4.5rem, 16vw, 15rem)',
               color: 'var(--graphite)',
-              letterSpacing: '-0.02em',
             }}
           >
             La Grande
           </div>
         </div>
 
-        <div className="overflow-hidden leading-[0.88]">
+        <div className="overflow-hidden leading-[0.85] ml-[10vw]">
           <div
             ref={line2Ref}
-            className="font-playfair font-black uppercase italic"
+            className="font-playfair font-black uppercase italic tracking-tighter"
             style={{
-              fontSize: 'clamp(4rem, 14vw, 13rem)',
-              WebkitTextStroke: '2px var(--gold)',
+              fontSize: 'clamp(4.5rem, 16vw, 15rem)',
+              WebkitTextStroke: '2px var(--lavender)',
               color: 'transparent',
-              letterSpacing: '-0.02em',
             }}
           >
             Projection

@@ -8,14 +8,13 @@
 :root {
   --bg:           #FFFFE4;
   --lavender:     #92A9E1;
-  --lavender-dim: #92A9E133;
-  --graphite:     #1C1C2E;
+  --lavender-dim: rgba(146, 169, 225, 0.15);
+  --graphite:     #2A2A2A;
   --gold:         #C9A227;
   --gold-dim:     #C9A22720;
-  --gold-light:   #E8C547;
-  --muted:        #5A5A7A;
+  --muted:        #8C8C8C;
   --white:        #FFFFFF;
-  --loader-bg:    #0D0D1A;
+  --loader-bg:    #FFFFE4;
 }
 
 /* ─── Reset ─────────────────────────────────────────────────────────────────── */
@@ -116,37 +115,41 @@ body::after {
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  padding: 1rem 2.8rem;
+  padding: 1.2rem 3rem;
   background: var(--graphite);
-  color: var(--bg);
+  color: var(--white);
   font-family: 'Source Sans 3', sans-serif;
   font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   border: none;
   cursor: pointer;
   overflow: hidden;
-  transition: color 0.4s ease;
+  border-radius: 16px 2px 16px 2px;
+  transition: all 0.4s cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+  background: var(--lavender);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
   z-index: 0;
+  border-radius: 16px 2px 16px 2px;
 }
 
 .btn-primary:hover::before {
-  transform: scaleX(1);
+  transform: scaleY(1);
 }
 
 .btn-primary:hover {
   color: var(--graphite);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(42, 42, 42, 0.15);
 }
 
 .btn-primary > * {
@@ -157,35 +160,36 @@ body::after {
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* ─── Input ──────────────────────────────────────────────────────────────────── */
 .input-field {
   width: 100%;
-  padding: 0.9rem 1.2rem;
+  padding: 1rem 0;
   background: transparent;
-  border: 1px solid rgba(28, 28, 46, 0.2);
+  border: none;
+  border-bottom: 2px solid rgba(42, 42, 42, 0.2);
   color: var(--graphite);
   font-family: 'Source Sans 3', sans-serif;
-  font-size: 1rem;
+  font-size: 1.1rem;
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.76, 0, 0.24, 1);
   border-radius: 0;
 }
 
 .input-field::placeholder {
   color: var(--muted);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .input-field:focus {
   border-color: var(--lavender);
-  box-shadow: 0 0 0 3px rgba(146, 169, 225, 0.15);
 }
 
 .input-field.error {
   border-color: #E57373;
-  box-shadow: 0 0 0 3px rgba(229, 115, 115, 0.1);
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */

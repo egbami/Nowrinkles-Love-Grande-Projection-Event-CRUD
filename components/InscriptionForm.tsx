@@ -111,40 +111,33 @@ export default function InscriptionForm() {
     >
       {/* Fond décoratif */}
       <div
-        className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 rounded-full opacity-10 pointer-events-none"
+        className="absolute top-0 right-0 w-[40rem] h-[40rem] rounded-full opacity-5 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, var(--lavender) 0%, transparent 70%)',
-          transform: 'translate(30%, -30%)',
+          background: 'radial-gradient(circle, var(--lavender) 0%, transparent 60%)',
+          transform: 'translate(20%, -20%)',
         }}
       />
-      <div
-        className="absolute bottom-0 left-0 w-48 h-48 md:w-72 md:h-72 rounded-full opacity-8 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, var(--gold) 0%, transparent 70%)',
-          transform: 'translate(-30%, 30%)',
-        }}
-      />
-
+      
       <div className="relative z-10 max-w-xl mx-auto">
 
         {/* En-tête */}
         <div ref={headRef} className="mb-14 text-center md:text-left">
           <p
             className="font-source text-[10px] tracking-[0.4em] uppercase mb-4"
-            style={{ color: 'var(--lavender)' }}
+            style={{ color: 'var(--muted)' }}
           >
             ✦ Rejoignez-nous
           </p>
 
           <h2
-            className="font-playfair font-bold leading-tight mb-4"
+            className="font-playfair font-black leading-tight mb-4 tracking-tighter"
             style={{
-              fontSize: 'clamp(2.4rem, 6vw, 4rem)',
+              fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
               color: 'var(--graphite)',
             }}
           >
             Réservez votre<br />
-            <span style={{ color: 'var(--gold)' }}>place</span> dès maintenant
+            <span style={{ color: 'var(--lavender)' }}>place</span> dès maintenant
           </h2>
 
           <p className="font-source text-base" style={{ color: 'var(--muted)', lineHeight: 1.7 }}>
@@ -168,14 +161,14 @@ export default function InscriptionForm() {
               </p>
             </div>
             {/* Barre de progression */}
-            <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(28,28,46,0.08)' }}>
+            <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(42,42,42,0.1)' }}>
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${pourcentage}%`,
                   background: pourcentage > 80
-                    ? 'linear-gradient(90deg, var(--gold), #e57373)'
-                    : 'linear-gradient(90deg, var(--lavender), var(--gold))',
+                    ? 'linear-gradient(90deg, var(--graphite), #e57373)'
+                    : 'linear-gradient(90deg, var(--lavender), var(--graphite))',
                 }}
               />
             </div>
