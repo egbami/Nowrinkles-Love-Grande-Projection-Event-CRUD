@@ -444,7 +444,16 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 Chargement…
               </p>
             </div>
-          ) : data?.participants.length === 0 ? (
+          ) : !data?.participants ? (
+            <div className="py-20 text-center">
+              <p className="font-playfair text-xl mb-2" style={{ color: '#e57373' }}>
+                Erreur de Chargement
+              </p>
+              <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
+                Les données n'ont pas pu être récupérées. Vérifiez vos variables d'environnement sur Vercel (DATABASE_URL) !
+              </p>
+            </div>
+          ) : data.participants.length === 0 ? (
             <div className="py-20 text-center">
               <p className="font-playfair text-xl mb-2" style={{ color: 'var(--graphite)' }}>
                 Aucun résultat
