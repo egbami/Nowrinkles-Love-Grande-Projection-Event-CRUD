@@ -1,0 +1,190 @@
+.pageWrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 440px);
+  gap: 3rem;
+  min-height: 100vh;
+  padding: 3rem;
+  align-items: center;
+}
+
+.hero {
+  max-width: 640px;
+  color: var(--white);
+}
+
+.kicker,
+.formKicker,
+.fieldLabel,
+.metricLabel {
+  font-family: var(--font-source), system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.72rem;
+}
+
+.kicker,
+.formKicker {
+  color: var(--lavender);
+  margin-bottom: 1rem;
+}
+
+.title,
+.formTitle {
+  font-family: var(--font-playfair), serif;
+  line-height: 0.96;
+}
+
+.title {
+  font-size: clamp(3.5rem, 9vw, 7rem);
+  margin-bottom: 1.25rem;
+  color: var(--white);
+  text-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+}
+
+.copy {
+  max-width: 34rem;
+  font-family: var(--font-source), system-ui, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.metricCard,
+.formCard {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 10, 10, 0.42);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+.metricCard {
+  padding: 1.1rem 1.2rem;
+  border-radius: 18px;
+}
+
+.metricValue {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--white);
+  font-family: var(--font-playfair), serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.deadline {
+  margin-top: 2rem;
+  font-family: var(--font-source), system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.96rem;
+}
+
+.formShell {
+  display: flex;
+  justify-content: center;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 440px;
+  padding: 2rem;
+  border-radius: 24px;
+  color: var(--white);
+}
+
+.formHeader {
+  margin-bottom: 1.5rem;
+}
+
+.formTitle {
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  color: var(--white);
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.fieldLabel {
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 0.35rem;
+}
+
+.fieldWrap {
+  position: relative;
+}
+
+.fieldWrap :global(.input-field) {
+  color: var(--white);
+  border-bottom-color: rgba(255, 255, 255, 0.28);
+  padding-right: 2.6rem;
+}
+
+.fieldWrap :global(.input-field)::placeholder {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.fieldWrap :global(.input-field):focus {
+  border-bottom-color: var(--gold);
+}
+
+.fieldWrap i {
+  position: absolute;
+  right: 0.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 999px;
+  animation: spin 0.85s linear infinite;
+}
+
+.formNote {
+  margin-top: 1.1rem;
+  font-family: var(--font-source), system-ui, sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 960px) {
+  .pageWrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+
+  .hero {
+    max-width: none;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .formCard {
+    max-width: none;
+  }
+}

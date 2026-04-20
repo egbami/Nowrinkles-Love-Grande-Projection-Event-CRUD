@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import {
+  buildDailyReportPdf,
+  ensureReportsBucket,
+  getReportFileName,
+  REPORTS_BUCKET,
+  REPORT_TIME_ZONE,
+} from '@/lib/reporting'
+import { supabaseAdmin } from '@/lib/supabase'
 
 // Cette route est appelée par Vercel Cron toutes les 24h
-// Elle renvoie les stats du jour et la liste des inscrits en JSON
-// Le PDF est généré côté admin (voir dashboard) pour éviter les libs lourdes sur serverless
+// Elle génère et stocke un PDF quotidien avec l'état exact des inscrits au moment du passage du cron
 export async function GET(req: NextRequest) {
   // Sécurise la route avec le secret cron
   const authHeader = req.headers.get('authorization')
@@ -24,26 +31,44 @@ export async function GET(req: NextRequest) {
       prisma.participant.findMany({
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true,
           prenom: true,
           nom: true,
           whatsapp: true,
           createdAt: true,
-          verifie: true,
         },
       }),
     ])
 
+    await ensureReportsBucket()
+
+    const pdf = buildDailyReportPdf({
+      generatedAt: now,
+      participants,
+    })
+
+    const fileName = getReportFileName(now)
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(REPORTS_BUCKET)
+      .upload(fileName, pdf, {
+        contentType: 'application/pdf',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      throw uploadError
+    }
+
     const rapport = {
       genereA: now.toISOString(),
-      genereALocale: now.toLocaleString('fr-FR', { timeZone: 'Africa/Porto-Novo' }),
+      genereALocale: now.toLocaleString('fr-FR', { timeZone: REPORT_TIME_ZONE }),
       totalInscrits: total,
       nouveauxAujourdHui,
       restants: Math.max(0, 200 - total),
-      participants,
+      fichier: fileName,
+      bucket: REPORTS_BUCKET,
     }
 
-    console.log(`[CRON] Rapport généré à ${rapport.genereALocale} — ${total} inscrits`)
+    console.log(`[CRON] Rapport PDF généré à ${rapport.genereALocale} — ${total} inscrits — ${fileName}`)
 
     return NextResponse.json(rapport)
   } catch (err) {

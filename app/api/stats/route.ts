@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-const MAX_PARTICIPANTS = 200
-const DATE_DEBUT       = new Date('2026-04-27T00:00:00.000Z')
-const DATE_FIN         = new Date('2026-05-31T23:59:59.000Z')
+import { isRegistrationOpen, MAX_PARTICIPANTS } from '@/lib/registration'
 
 export async function GET() {
   try {
     const total = await prisma.participant.count()
     const now   = new Date()
-    // Les inscriptions sont ouvertes si on est AVANT ou LE 31 Mai 2026 à 23h59m59, ET qu'on a moins de 200 inscrits.
-    const ouvert = now <= DATE_FIN && total < MAX_PARTICIPANTS
+    const ouvert = isRegistrationOpen(now, total)
 
     return NextResponse.json({
       total,

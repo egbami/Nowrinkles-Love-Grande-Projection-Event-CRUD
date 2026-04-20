@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-// ─── Constantes métier ────────────────────────────────────────────────────────
-const MAX_PARTICIPANTS = 200
-const DATE_DEBUT       = new Date('2026-04-27T00:00:00.000Z')
-const DATE_FIN         = new Date('2026-05-31T23:59:59.000Z')
+import {
+  isRegistrationOpen,
+  MAX_PARTICIPANTS,
+  REGISTRATION_CLOSES_AT,
+} from '@/lib/registration'
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,13 +29,12 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
-    // Supprimé : la vérification DATE_DEBUT, car le client a demandé l'ouverture immédiate.
-    if (now > DATE_FIN) {
+    if (now > REGISTRATION_CLOSES_AT) {
       return NextResponse.json({ error: 'Les inscriptions sont closes depuis le 31 mai 2026.' }, { status: 403 })
     }
 
     const total = await prisma.participant.count()
-    if (total >= MAX_PARTICIPANTS) {
+    if (!isRegistrationOpen(now, total)) {
       return NextResponse.json({ error: 'Les 200 places sont prises. Les inscriptions sont closes.' }, { status: 403 })
     }
 

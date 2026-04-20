@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import toast from 'react-hot-toast'
 
 /* ─── Types ─────────────────────────────────────────────────────────────────── */
 interface Participant {
@@ -21,6 +22,14 @@ interface PageData {
   totalPages: number
 }
 
+interface ReportFile {
+  name: string
+  createdAt?: string
+  updatedAt?: string
+  size: number
+  downloadUrl: string
+}
+
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -28,6 +37,12 @@ function formatDate(iso: string) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} o`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} Ko`
+  return `${(size / (1024 * 1024)).toFixed(1)} Mo`
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -141,6 +156,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [loading, setLoading]   = useState(true)
   const [total, setTotal]       = useState(0)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [reports, setReports] = useState<ReportFile[]>([])
+  const [reportsLoading, setReportsLoading] = useState(true)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchParticipants = useCallback(async (searchVal: string, pageVal: number) => {
@@ -172,6 +191,29 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     return () => clearInterval(interval)
   }, [fetchParticipants, search, page])
 
+  const fetchReports = useCallback(async () => {
+    setReportsLoading(true)
+    try {
+      const res = await fetch('/api/admin/reports')
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
+      const json = await res.json()
+      if (res.ok) {
+        setReports(json.reports || [])
+      }
+    } catch {
+      // silencieux
+    } finally {
+      setReportsLoading(false)
+    }
+  }, [onLogout])
+
+  useEffect(() => {
+    fetchReports()
+  }, [fetchReports])
+
   const handleSearch = (val: string) => {
     setSearch(val)
     setPage(1)
@@ -182,6 +224,101 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const handleLogout = async () => {
     await fetch('/api/admin/login', { method: 'DELETE' })
     onLogout()
+  }
+
+  const toggleVerification = async (participant: Participant) => {
+    setUpdatingId(participant.id)
+    try {
+      const res = await fetch(`/api/admin/participants/${participant.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verifie: !participant.verifie }),
+      })
+
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
+
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || 'Mise à jour impossible.')
+        return
+      }
+
+      setData((current) => {
+        if (!current) return current
+        return {
+          ...current,
+          participants: current.participants.map((entry) =>
+            entry.id === participant.id ? json.participant : entry
+          ),
+        }
+      })
+
+      toast.success(
+        participant.verifie ? 'Participant marqué non vérifié.' : 'Participant vérifié.'
+      )
+    } catch {
+      toast.error('Erreur réseau pendant la mise à jour.')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const deleteParticipant = async (participant: Participant) => {
+    const confirmed = window.confirm(
+      `Supprimer ${participant.prenom} ${participant.nom} de la liste des inscrits ?`
+    )
+
+    if (!confirmed) return
+
+    setDeletingId(participant.id)
+    try {
+      const res = await fetch(`/api/admin/participants/${participant.id}`, {
+        method: 'DELETE',
+      })
+
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
+
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || 'Suppression impossible.')
+        return
+      }
+
+      setData((current) => {
+        if (!current) return current
+
+        const participants = current.participants.filter((entry) => entry.id !== participant.id)
+        const total = Math.max(0, current.total - 1)
+        const totalPages = Math.max(1, Math.ceil(total / 20))
+
+        return {
+          ...current,
+          participants,
+          total,
+          totalPages,
+        }
+      })
+
+      setTotal((current) => Math.max(0, current - 1))
+      toast.success('Participant supprimé.')
+
+      const isLastItemOnPage = data?.participants.length === 1
+      if (isLastItemOnPage && page > 1) {
+        setPage((current) => Math.max(1, current - 1))
+      } else {
+        fetchParticipants(search, page)
+      }
+    } catch {
+      toast.error('Erreur réseau pendant la suppression.')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const exportCSV = () => {
@@ -427,10 +564,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             }}
           >
             <div className="col-span-1">#</div>
-            <div className="col-span-3">Prénom</div>
-            <div className="col-span-3">Nom</div>
-            <div className="col-span-3 hidden md:block">WhatsApp</div>
-            <div className="col-span-2 hidden md:block">Date</div>
+            <div className="col-span-2">Prénom</div>
+            <div className="col-span-2">Nom</div>
+            <div className="col-span-3 hidden lg:block">WhatsApp</div>
+            <div className="col-span-2 hidden lg:block">Date</div>
+            <div className="col-span-2">Statut</div>
+            <div className="col-span-5 lg:col-span-2 text-right">Actions</div>
           </div>
 
           {/* Lignes */}
@@ -450,7 +589,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 Erreur de Chargement
               </p>
               <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
-                Les données n'ont pas pu être récupérées. Vérifiez vos variables d'environnement sur Vercel (DATABASE_URL) !
+                Les données n&apos;ont pas pu être récupérées. Vérifiez vos variables d&apos;environnement sur Vercel (DATABASE_URL) !
               </p>
             </div>
           ) : data.participants.length === 0 ? (
@@ -475,17 +614,50 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 <div className="col-span-1 font-bold" style={{ color: 'var(--muted)' }}>
                   {((data.page - 1) * 20) + i + 1}
                 </div>
-                <div className="col-span-3 font-semibold" style={{ color: 'var(--graphite)' }}>
+                <div className="col-span-2 font-semibold" style={{ color: 'var(--graphite)' }}>
                   {p.prenom}
                 </div>
-                <div className="col-span-3" style={{ color: 'var(--graphite)' }}>
+                <div className="col-span-2" style={{ color: 'var(--graphite)' }}>
                   {p.nom}
                 </div>
-                <div className="col-span-3 hidden md:block" style={{ color: 'var(--muted)' }}>
+                <div className="col-span-3 hidden lg:block" style={{ color: 'var(--muted)' }}>
                   {p.whatsapp}
                 </div>
-                <div className="col-span-2 hidden md:block text-xs" style={{ color: 'var(--muted)' }}>
+                <div className="col-span-2 hidden lg:block text-xs" style={{ color: 'var(--muted)' }}>
                   {formatDate(p.createdAt)}
+                </div>
+                <div className="col-span-2 flex items-center">
+                  <span
+                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] uppercase tracking-widest"
+                    style={{
+                      background: p.verifie ? 'rgba(201,162,39,0.14)' : 'rgba(146,169,225,0.12)',
+                      color: p.verifie ? 'var(--gold)' : 'var(--muted)',
+                    }}
+                  >
+                    {p.verifie ? 'Vérifié' : 'En attente'}
+                  </span>
+                </div>
+                <div className="col-span-5 lg:col-span-2 flex justify-end">
+                  <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleVerification(p)}
+                    disabled={updatingId === p.id || deletingId === p.id}
+                    className="font-source text-[11px] tracking-widest uppercase px-3 py-2 border transition-all duration-200 disabled:opacity-50"
+                    style={{ borderColor: 'rgba(28,28,46,0.2)', color: 'var(--graphite)' }}
+                  >
+                    {updatingId === p.id ? '...' : p.verifie ? 'Annuler' : 'Valider'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteParticipant(p)}
+                    disabled={deletingId === p.id || updatingId === p.id}
+                    className="font-source text-[11px] tracking-widest uppercase px-3 py-2 border transition-all duration-200 disabled:opacity-50"
+                    style={{ borderColor: 'rgba(229,115,115,0.4)', color: '#b14545' }}
+                  >
+                    {deletingId === p.id ? '...' : 'Supprimer'}
+                  </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -531,10 +703,76 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             ✦ Rapport automatique
           </p>
           <p className="font-source text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
-            Un rapport est généré automatiquement chaque jour à <strong style={{ color: 'var(--graphite)' }}>06h00</strong> par le cron Vercel.
+            Un rapport PDF est généré automatiquement chaque jour à <strong style={{ color: 'var(--graphite)' }}>06h00</strong> heure Afrique de l&apos;Ouest.
             Vous pouvez aussi générer manuellement un PDF ou un CSV via les boutons en haut de page.
             Le tableau ci-dessus se rafraîchit automatiquement toutes les 30 secondes.
           </p>
+        </div>
+
+        <div
+          className="mt-8 p-5 border"
+          style={{
+            borderColor: 'rgba(28,28,46,0.08)',
+            background: 'rgba(255,255,228,0.6)',
+          }}
+        >
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <p className="font-source text-xs tracking-widest uppercase mb-1" style={{ color: 'var(--lavender)' }}>
+                ✦ Rapports quotidiens
+              </p>
+              <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
+                Historique des PDF générés automatiquement par le cron.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchReports}
+              className="font-source text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200 hover:border-gold"
+              style={{ borderColor: 'rgba(28,28,46,0.2)', color: 'var(--graphite)' }}
+            >
+              Rafraîchir
+            </button>
+          </div>
+
+          {reportsLoading ? (
+            <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
+              Chargement des rapports…
+            </p>
+          ) : reports.length === 0 ? (
+            <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
+              Aucun rapport PDF automatique disponible pour le moment.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {reports.map((report) => (
+                <div
+                  key={report.name}
+                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border px-4 py-3"
+                  style={{ borderColor: 'rgba(28,28,46,0.08)' }}
+                >
+                  <div>
+                    <p className="font-source text-sm font-semibold" style={{ color: 'var(--graphite)' }}>
+                      {report.name}
+                    </p>
+                    <p className="font-source text-xs" style={{ color: 'var(--muted)' }}>
+                      {report.createdAt ? `Généré le ${formatDate(report.createdAt)}` : 'Date indisponible'} · {formatFileSize(report.size)}
+                    </p>
+                  </div>
+
+                  <a
+                    href={report.downloadUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-source text-xs tracking-widest uppercase px-4 py-2 border text-center transition-all duration-200 hover:border-gold"
+                    style={{ borderColor: 'rgba(28,28,46,0.2)', color: 'var(--graphite)' }}
+                  >
+                    Télécharger
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

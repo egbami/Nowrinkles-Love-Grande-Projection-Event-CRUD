@@ -1,153 +1,207 @@
 'use client'
 
-import { useState } from 'react'
-import dynamic from 'next/dynamic'
-import LoadingScreen from '@/components/LoadingScreen'
-import SmoothScrollProvider from '@/components/SmoothScrollProvider'
-import HeroSection from '@/components/HeroSection'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
+import styles from './page.module.css'
 
-// Import dynamique (SSR désactivé pour les composants avec animations)
-const InscriptionForm = dynamic(() => import('@/components/InscriptionForm'), {
-  ssr: false,
-})
+type StatsResponse = {
+  total: number
+  max: number
+  restants: number
+  ouvert: boolean
+}
+
+const initialForm = {
+  prenom: '',
+  nom: '',
+  whatsapp: '',
+}
 
 export default function HomePage() {
-  const [loaded, setLoaded] = useState(false)
+  const router = useRouter()
+  const [form, setForm] = useState(initialForm)
+  const [submitting, setSubmitting] = useState(false)
+  const [stats, setStats] = useState<StatsResponse | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+
+    const loadStats = async () => {
+      try {
+        const res = await fetch('/api/stats', { cache: 'no-store' })
+        const data: StatsResponse = await res.json()
+        if (active) setStats(data)
+      } catch {
+        if (active) {
+          setStats({
+            total: 0,
+            max: 200,
+            restants: 200,
+            ouvert: false,
+          })
+        }
+      } finally {
+        if (active) setStatsLoading(false)
+      }
+    }
+
+    loadStats()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const updateField = (field: keyof typeof initialForm, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (submitting) return
+
+    setSubmitting(true)
+
+    try {
+      const res = await fetch('/api/inscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || 'Inscription impossible pour le moment.')
+        return
+      }
+
+      toast.success(data.message || 'Inscription enregistree.')
+      const prenom = form.prenom.trim()
+      const nom = form.nom.trim()
+      setForm(initialForm)
+      router.push(`/confirmation?prenom=${encodeURIComponent(prenom)}&nom=${encodeURIComponent(nom)}`)
+    } catch {
+      toast.error('Erreur reseau. Reessayez dans quelques instants.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const closed = statsLoading ? false : !stats?.ouvert
 
   return (
-    <>
-      {/* Écran de chargement */}
-      {!loaded && <LoadingScreen onComplete={() => setLoaded(true)} />}
-
-      {/* Contenu principal */}
-      <SmoothScrollProvider>
-        <main
-          style={{
-            opacity: loaded ? 1 : 0,
-            transition: 'opacity 0.4s ease',
-          }}
-        >
-          {/* Section 1 : Hero */}
-          <HeroSection visible={loaded} />
-
-          {/* Séparateur */}
-          <div
-            className="mx-6 md:mx-14"
-            style={{ height: '1px', background: 'rgba(28,28,46,0.08)' }}
-          />
-
-          {/* Section 2 : À propos / Citation */}
-          <AboutSection />
-
-          {/* Section 3 : Formulaire d'inscription */}
-          <InscriptionForm />
-
-          {/* Footer */}
-          <Footer />
-        </main>
-      </SmoothScrollProvider>
-    </>
-  )
-}
-
-/* ─── Section À propos ──────────────────────────────────────────────────────── */
-function AboutSection() {
-  return (
-    <section
-      className="py-24 md:py-36 px-6 md:px-14"
-      style={{ background: 'var(--bg)' }}
-    >
-      <div className="max-w-4xl mx-auto text-center">
-        <p
-          className="font-source text-[10px] tracking-[0.4em] uppercase mb-8"
-          style={{ color: 'var(--lavender)' }}
-        >
-          ✦ L&apos;événement
+    <main className={styles.pageWrapper}>
+      <section className={styles.hero}>
+        <p className={styles.kicker}>Nowrinkles Love</p>
+        <h1 className={styles.title}>La Grande Projection</h1>
+        <p className={styles.copy}>
+          Inscrivez-vous a l&apos;evenement et reservez votre place avant la cloture des inscriptions.
         </p>
 
-        {/* Citation biblique */}
-        <blockquote className="mb-14">
-          <p
-            className="font-playfair italic leading-relaxed"
-            style={{
-              fontSize: 'clamp(1.4rem, 4vw, 2.4rem)',
-              color: 'var(--graphite)',
-            }}
-          >
-            &ldquo; Car Dieu a tant aimé le monde qu&apos;il a donné son Fils unique,
-            afin que quiconque croit en lui ne périsse point, mais qu&apos;il ait
-            la vie éternelle. &rdquo;
-          </p>
-          <footer
-            className="mt-4 font-source text-sm tracking-widest uppercase"
-            style={{ color: 'var(--muted)' }}
-          >
-            — Jean 3:16
-          </footer>
-        </blockquote>
-
-        <div className="cross-line max-w-xs mx-auto mb-14">
-          <span style={{ color: 'var(--lavender)', fontSize: '1rem' }}>✝</span>
+        <div className={styles.metrics}>
+          <div className={styles.metricCard}>
+            <span className={styles.metricLabel}>Places restantes</span>
+            <strong className={styles.metricValue}>{statsLoading ? '...' : stats?.restants ?? 0}</strong>
+          </div>
+          <div className={styles.metricCard}>
+            <span className={styles.metricLabel}>Capacite</span>
+            <strong className={styles.metricValue}>
+              {statsLoading ? '...' : `${stats?.total ?? 0}/${stats?.max ?? 200}`}
+            </strong>
+          </div>
         </div>
 
-        {/* Description */}
-        <p
-          className="font-source text-base md:text-lg leading-relaxed max-w-2xl mx-auto"
-          style={{ color: 'var(--muted)', lineHeight: 1.9 }}
-        >
-          <strong style={{ color: 'var(--graphite)' }}>La Grande Projection</strong> est
-          un événement chrétien organisé par{' '}
-          <strong style={{ color: 'var(--graphite)' }}>Nowrinkles Love</strong>.
-          Un moment unique de communion, de foi et de partage.
-          Inscrivez-vous dès maintenant — les places sont limitées à{' '}
-          <strong style={{ color: 'var(--lavender)' }}>200 participants</strong>.
-        </p>
+        <p className={styles.deadline}>Fin des inscriptions : 31 Mai 2026</p>
+      </section>
 
-        {/* Infos pratiques */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
-          {[
-            { label: 'Inscription', value: '27 Avr — 31 Mai', icon: '✦' },
-            { label: 'Places disponibles', value: '200 max', icon: '✦' },
-            { label: 'Entrée', value: 'Sur invitation QR', icon: '✦' },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="text-center">
-              <div className="text-2xl mb-3" style={{ color: 'var(--lavender)' }}>{icon}</div>
-              <p
-                className="font-source text-[10px] tracking-[0.3em] uppercase mb-1"
-                style={{ color: 'var(--muted)' }}
-              >
-                {label}
-              </p>
-              <p
-                className="font-playfair font-semibold text-lg"
-                style={{ color: 'var(--graphite)' }}
-              >
-                {value}
-              </p>
+      <section className={styles.formShell}>
+        <div className={styles.formCard}>
+          <div className={styles.formHeader}>
+            <p className={styles.formKicker}>Formulaire d&apos;inscription</p>
+            <h2 className={styles.formTitle}>Reservez votre acces</h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className={styles.form} noValidate>
+            <label className={styles.fieldLabel} htmlFor="prenom">
+              Prenom
+            </label>
+            <div className={styles.fieldWrap}>
+              <input
+                id="prenom"
+                type="text"
+                name="prenom"
+                placeholder="Votre prenom"
+                className="input-field"
+                value={form.prenom}
+                onChange={(event) => updateField('prenom', event.target.value)}
+                disabled={submitting || closed}
+                required
+              />
+              <i className="bx bxs-user-detail" />
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
 
-/* ─── Footer ────────────────────────────────────────────────────────────────── */
-function Footer() {
-  return (
-    <footer
-      className="py-10 px-6 md:px-14 text-center border-t"
-      style={{
-        borderColor: 'rgba(28,28,46,0.08)',
-        background: 'var(--bg)',
-      }}
-    >
-      <p
-        className="font-source text-xs tracking-widest uppercase"
-        style={{ color: 'var(--muted)' }}
-      >
-        © 2026 Nowrinkles Love — Fait avec ✝ à Cotonou, Bénin
-      </p>
-    </footer>
+            <label className={styles.fieldLabel} htmlFor="nom">
+              Nom
+            </label>
+            <div className={styles.fieldWrap}>
+              <input
+                id="nom"
+                type="text"
+                name="nom"
+                placeholder="Votre nom"
+                className="input-field"
+                value={form.nom}
+                onChange={(event) => updateField('nom', event.target.value)}
+                disabled={submitting || closed}
+                required
+              />
+              <i className="bx bxs-user" />
+            </div>
+
+            <label className={styles.fieldLabel} htmlFor="whatsapp">
+              Numero WhatsApp
+            </label>
+            <div className={styles.fieldWrap}>
+              <input
+                id="whatsapp"
+                type="tel"
+                name="whatsapp"
+                placeholder="+229 00 00 00 00"
+                className="input-field"
+                value={form.whatsapp}
+                onChange={(event) => updateField('whatsapp', event.target.value)}
+                disabled={submitting || closed}
+                required
+              />
+              <i className="bx bxl-whatsapp" />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={submitting || closed}>
+              {closed ? (
+                <span>Inscriptions closes</span>
+              ) : submitting ? (
+                <>
+                  <span className={styles.spinner} />
+                  <span>Enregistrement...</span>
+                </>
+              ) : (
+                <>
+                  <span>S&apos;inscrire</span>
+                  <span>→</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <p className={styles.formNote}>
+            Les informations saisies sont envoyees a l&apos;API d&apos;inscription et stockees en base de donnees.
+          </p>
+        </div>
+      </section>
+    </main>
   )
 }

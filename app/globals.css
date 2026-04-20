@@ -25,12 +25,20 @@
 }
 
 html {
-  background-color: var(--bg);
+  background-color: #0f1512;
+  background-image:
+    linear-gradient(rgba(12, 18, 15, 0.68), rgba(12, 18, 15, 0.82)),
+    url('/1.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
   scroll-behavior: auto; /* Lenis gère ça */
 }
 
 body {
-  background-color: var(--bg);
+  min-height: 100vh;
+  background: transparent;
   color: var(--graphite);
   font-family: 'Source Sans 3', system-ui, sans-serif;
   overflow-x: hidden;

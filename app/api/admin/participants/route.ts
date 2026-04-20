@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isAdminSession } from '@/lib/admin-auth'
 
 function isAdmin(req: NextRequest) {
   const session = req.cookies.get('admin_session')?.value
-  return session === process.env.ADMIN_PASSWORD
+  return isAdminSession(session)
 }
 
 export async function GET(req: NextRequest) {
