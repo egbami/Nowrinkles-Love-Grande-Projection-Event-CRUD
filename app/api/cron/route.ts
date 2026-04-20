@@ -7,7 +7,7 @@ import {
   REPORTS_BUCKET,
   REPORT_TIME_ZONE,
 } from '@/lib/reporting'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 // Cette route est appelée par Vercel Cron toutes les 24h
 // Elle génère et stocke un PDF quotidien avec l'état exact des inscrits au moment du passage du cron
@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
     ])
 
     await ensureReportsBucket()
+    const supabaseAdmin = getSupabaseAdmin()
 
     const pdf = buildDailyReportPdf({
       generatedAt: now,

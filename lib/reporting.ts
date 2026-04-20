@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export const REPORTS_BUCKET = process.env.REPORTS_BUCKET || 'daily-reports'
 export const REPORT_TIME_ZONE = 'Africa/Porto-Novo'
@@ -44,6 +44,7 @@ export function getReportFileName(date: Date) {
 }
 
 export async function ensureReportsBucket() {
+  const supabaseAdmin = getSupabaseAdmin()
   const { data, error } = await supabaseAdmin.storage.getBucket(REPORTS_BUCKET)
   if (!error && data) return
 

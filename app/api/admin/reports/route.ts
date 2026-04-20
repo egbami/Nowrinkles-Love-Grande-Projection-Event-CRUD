@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAdminSession } from '@/lib/admin-auth'
 import { ensureReportsBucket, REPORTS_BUCKET } from '@/lib/reporting'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 function isAdmin(req: NextRequest) {
   return isAdminSession(req.cookies.get('admin_session')?.value)
@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     await ensureReportsBucket()
 
     const { data, error } = await supabaseAdmin.storage

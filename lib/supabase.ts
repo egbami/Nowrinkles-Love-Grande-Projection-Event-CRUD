@@ -1,13 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Client public (côté navigateur)
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getRequiredEnv(name: string) {
+  const value = process.env[name]?.trim()
+  if (!value) {
+    throw new Error(`${name} is required.`)
+  }
+  return value
+}
 
-// Client admin (côté serveur uniquement)
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-)
+export function getSupabaseClient() {
+  return createClient(
+    getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getRequiredEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  )
+}
+
+export function getSupabaseAdmin() {
+  return createClient(
+    getRequiredEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getRequiredEnv('SUPABASE_SERVICE_KEY')
+  )
+}
