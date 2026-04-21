@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date()
-    if (now > REGISTRATION_CLOSES_AT) {
+    if (now.getTime() > REGISTRATION_CLOSES_AT.getTime()) {
       return NextResponse.json({ error: 'Les inscriptions sont closes depuis le 31 mai 2026.' }, { status: 403 })
     }
 
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: `Bienvenue, ${participant.prenom} !`, id: participant.id }, { status: 201 })
 
-  } catch (err) {
+  } catch (err: any) {
     console.error('[INSCRIPTION ERROR]', err)
-    return NextResponse.json({ error: 'Erreur serveur. Réessayez dans quelques instants.' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur. Réessayez dans quelques instants.', details: err.message }, { status: 500 })
   }
 }

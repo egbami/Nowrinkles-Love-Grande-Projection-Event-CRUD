@@ -4,5 +4,5 @@ export const MAX_PARTICIPANTS = 200
 export const REGISTRATION_CLOSES_AT = new Date('2026-05-31T22:59:59.999Z')
 
 export function isRegistrationOpen(now: Date, totalParticipants: number) {
-  return now <= REGISTRATION_CLOSES_AT && totalParticipants < MAX_PARTICIPANTS
+  return now.getTime() <= REGISTRATION_CLOSES_AT.getTime() && totalParticipants < MAX_PARTICIPANTS
 }
