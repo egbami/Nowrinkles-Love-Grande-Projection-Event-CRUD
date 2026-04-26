@@ -99,7 +99,7 @@ export default function HomePage() {
         <p className={styles.kicker}>Nowrinkles Love</p>
         <h1 className={styles.title}>La Grande Projection</h1>
         <p className={styles.copy}>
-          Inscrivez-vous a l&apos;evenement et reservez votre place avant la cloture des inscriptions.
+          Inscrivez-vous à l&apos;événement et réservez votre place avant la clôture des inscriptions.
         </p>
 
         <div className={styles.metrics}>
@@ -108,7 +108,7 @@ export default function HomePage() {
             <strong className={styles.metricValue}>{statsLoading ? '...' : stats?.restants ?? 0}</strong>
           </div>
           <div className={styles.metricCard}>
-            <span className={styles.metricLabel}>Capacite</span>
+            <span className={styles.metricLabel}>Capacité</span>
             <strong className={styles.metricValue}>
               {statsLoading ? '...' : `${stats?.total ?? 0}/${stats?.max ?? 200}`}
             </strong>
@@ -122,19 +122,19 @@ export default function HomePage() {
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
             <p className={styles.formKicker}>Formulaire d&apos;inscription</p>
-            <h2 className={styles.formTitle}>Reservez votre acces</h2>
+            <h2 className={styles.formTitle}>Réservez votre accès</h2>
           </div>
 
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <label className={styles.fieldLabel} htmlFor="prenom">
-              Prenom
+              Prénom
             </label>
             <div className={styles.fieldWrap}>
               <input
                 id="prenom"
                 type="text"
                 name="prenom"
-                placeholder="Votre prenom"
+                placeholder="Votre prénom"
                 className="input-field"
                 value={form.prenom}
                 onChange={(event) => updateField('prenom', event.target.value)}
@@ -163,7 +163,7 @@ export default function HomePage() {
             </div>
 
             <label className={styles.fieldLabel} htmlFor="whatsapp">
-              Numero WhatsApp
+              Numéro WhatsApp
             </label>
             <div className={styles.fieldWrap}>
               <input
@@ -198,7 +198,7 @@ export default function HomePage() {
           </form>
 
           <p className={styles.formNote}>
-            Les informations saisies sont envoyees a l&apos;API d&apos;inscription et stockees en base de donnees.
+            Les informations saisies sont envoyées à l&apos;API d&apos;inscription et stockées en base de données.
           </p>
         </div>
       </section>
