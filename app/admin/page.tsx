@@ -335,8 +335,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
       // Import dynamique jsPDF pour éviter le bundle côté serveur
       const { jsPDF } = await import('jspdf')
-      // @ts-ignore
-      await import('jspdf-autotable')
+      const { default: autoTable } = await import('jspdf-autotable')
 
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
@@ -368,8 +367,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         p.verifie ? '✓' : '—',
       ])
 
-      // @ts-ignore
-      doc.autoTable({
+      autoTable(doc, {
         startY: 48,
         head:   [['#', 'Prénom', 'Nom', 'WhatsApp', "Date d'inscription", 'Vérifié']],
         body:   tableData,
@@ -393,7 +391,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       })
 
       // Pied de page
-      const pageCount = (doc as any).internal.getNumberOfPages()
+      const pageCount = doc.getNumberOfPages()
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
         doc.setFontSize(7)
