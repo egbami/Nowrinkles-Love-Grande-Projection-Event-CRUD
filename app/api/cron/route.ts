@@ -72,8 +72,12 @@ export async function GET(req: NextRequest) {
     console.log(`[CRON] Rapport PDF généré à ${rapport.genereALocale} — ${total} inscrits — ${fileName}`)
 
     return NextResponse.json(rapport)
-  } catch (err) {
+  } catch (err: any) {
     console.error('[CRON ERROR]', err)
-    return NextResponse.json({ error: 'Erreur lors de la génération du rapport.' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Erreur lors de la génération du rapport.',
+      details: err.message,
+      stack: err.stack
+    }, { status: 500 })
   }
 }
