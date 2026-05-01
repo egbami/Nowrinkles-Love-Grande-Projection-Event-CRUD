@@ -1,5 +1,4 @@
-import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
+
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 export const REPORTS_BUCKET = process.env.REPORTS_BUCKET || 'daily-reports'
@@ -58,10 +57,13 @@ export async function ensureReportsBucket() {
   }
 }
 
-export function buildDailyReportPdf(params: {
+export async function buildDailyReportPdf(params: {
   generatedAt: Date
   participants: ReportParticipant[]
 }) {
+  const { jsPDF } = await import('jspdf')
+  const { default: autoTable } = await import('jspdf-autotable')
+
   const { generatedAt, participants } = params
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const generatedAtLocal = formatDateTime(generatedAt)

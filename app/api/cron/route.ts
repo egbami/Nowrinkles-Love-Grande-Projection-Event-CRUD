@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     await ensureReportsBucket()
     const supabaseAdmin = getSupabaseAdmin()
 
-    const pdf = buildDailyReportPdf({
+    const pdf = await buildDailyReportPdf({
       generatedAt: now,
       participants,
     })
