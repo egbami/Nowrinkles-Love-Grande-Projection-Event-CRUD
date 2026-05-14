@@ -197,9 +197,7 @@ export default function HomePage() {
             </button>
           </form>
 
-          <p className={styles.formNote}>
-            Les informations saisies sont envoyées à l&apos;API d&apos;inscription et stockées en base de données.
-          </p>
+        
         </div>
       </section>
     </main>
