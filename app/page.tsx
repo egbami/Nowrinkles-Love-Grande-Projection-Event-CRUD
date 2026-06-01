@@ -125,77 +125,86 @@ export default function HomePage() {
             <h2 className={styles.formTitle}>Réservez votre accès</h2>
           </div>
 
-          <form onSubmit={handleSubmit} className={styles.form} noValidate>
-            <label className={styles.fieldLabel} htmlFor="prenom">
-              Prénom
-            </label>
-            <div className={styles.fieldWrap}>
-              <input
-                id="prenom"
-                type="text"
-                name="prenom"
-                placeholder="Votre prénom"
-                className="input-field"
-                value={form.prenom}
-                onChange={(event) => updateField('prenom', event.target.value)}
-                disabled={submitting || closed}
-                required
-              />
-              <i className="bx bxs-user-detail" />
+          {closed ? (
+            <div className="py-12 text-center">
+              <p className="font-playfair text-2xl mb-3" style={{ color: '#e57373' }}>
+                Les inscriptions sont closes
+              </p>
+              <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
+                Merci pour votre intérêt. La date limite d'inscription est dépassée ou la capacité maximale a été atteinte.
+              </p>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} className={styles.form} noValidate>
+              <label className={styles.fieldLabel} htmlFor="prenom">
+                Prénom
+              </label>
+              <div className={styles.fieldWrap}>
+                <input
+                  id="prenom"
+                  type="text"
+                  name="prenom"
+                  placeholder="Votre prénom"
+                  className="input-field"
+                  value={form.prenom}
+                  onChange={(event) => updateField('prenom', event.target.value)}
+                  disabled={submitting}
+                  required
+                />
+                <i className="bx bxs-user-detail" />
+              </div>
 
-            <label className={styles.fieldLabel} htmlFor="nom">
-              Nom
-            </label>
-            <div className={styles.fieldWrap}>
-              <input
-                id="nom"
-                type="text"
-                name="nom"
-                placeholder="Votre nom"
-                className="input-field"
-                value={form.nom}
-                onChange={(event) => updateField('nom', event.target.value)}
-                disabled={submitting || closed}
-                required
-              />
-              <i className="bx bxs-user" />
-            </div>
+              <label className={styles.fieldLabel} htmlFor="nom">
+                Nom
+              </label>
+              <div className={styles.fieldWrap}>
+                <input
+                  id="nom"
+                  type="text"
+                  name="nom"
+                  placeholder="Votre nom"
+                  className="input-field"
+                  value={form.nom}
+                  onChange={(event) => updateField('nom', event.target.value)}
+                  disabled={submitting}
+                  required
+                />
+                <i className="bx bxs-user" />
+              </div>
 
-            <label className={styles.fieldLabel} htmlFor="whatsapp">
-              Numéro WhatsApp
-            </label>
-            <div className={styles.fieldWrap}>
-              <input
-                id="whatsapp"
-                type="tel"
-                name="whatsapp"
-                placeholder="+229 00 00 00 00"
-                className="input-field"
-                value={form.whatsapp}
-                onChange={(event) => updateField('whatsapp', event.target.value)}
-                disabled={submitting || closed}
-                required
-              />
-              <i className="bx bxl-whatsapp" />
-            </div>
+              <label className={styles.fieldLabel} htmlFor="whatsapp">
+                Numéro WhatsApp
+              </label>
+              <div className={styles.fieldWrap}>
+                <input
+                  id="whatsapp"
+                  type="tel"
+                  name="whatsapp"
+                  placeholder="+229 00 00 00 00"
+                  className="input-field"
+                  value={form.whatsapp}
+                  onChange={(event) => updateField('whatsapp', event.target.value)}
+                  disabled={submitting}
+                  required
+                />
+                <i className="bx bxl-whatsapp" />
+              </div>
 
-            <button type="submit" className="btn-primary" disabled={submitting || closed}>
-              {closed ? (
-                <span>Inscriptions closes</span>
-              ) : submitting ? (
-                <>
-                  <span className={styles.spinner} />
-                  <span>Enregistrement...</span>
-                </>
-              ) : (
-                <>
-                  <span>S&apos;inscrire</span>
-                  <span>→</span>
-                </>
-              )}
-            </button>
-          </form>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <span className={styles.spinner} />
+                    <span>Enregistrement...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>S'inscrire</span>
+                    <span>→</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
         
         </div>
