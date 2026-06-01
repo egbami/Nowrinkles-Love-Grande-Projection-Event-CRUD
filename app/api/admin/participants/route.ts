@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isAdminSession } from '@/lib/admin-auth'
+import { normalizeWhatsAppNumber } from '@/lib/phone'
 
 function isAdmin(req: NextRequest) {
   const session = req.cookies.get('admin_session')?.value
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
           OR: [
             { nom:      { contains: search, mode: 'insensitive' as const } },
             { prenom:   { contains: search, mode: 'insensitive' as const } },
-            { whatsapp: { contains: search } },
+            { whatsapp: { contains: normalizeWhatsAppNumber(search) || search } },
           ],
         }
       : {}

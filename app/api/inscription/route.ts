@@ -5,6 +5,7 @@ import {
   MAX_PARTICIPANTS,
   REGISTRATION_CLOSES_AT,
 } from '@/lib/registration'
+import { normalizeWhatsAppNumber } from '@/lib/phone'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,14 +18,13 @@ export async function POST(req: NextRequest) {
 
     const prenomT   = String(prenom).trim()
     const nomT      = String(nom).trim()
-    const whatsappT = String(whatsapp).trim()
+    const whatsappT = normalizeWhatsAppNumber(whatsapp)
 
     if (prenomT.length < 2 || nomT.length < 2) {
       return NextResponse.json({ error: 'Prénom et nom doivent contenir au moins 2 caractères.' }, { status: 400 })
     }
 
-    const phoneRegex = /^\+?[\d\s\-().]{8,20}$/
-    if (!phoneRegex.test(whatsappT)) {
+    if (!whatsappT) {
       return NextResponse.json({ error: 'Numéro WhatsApp invalide.' }, { status: 400 })
     }
 

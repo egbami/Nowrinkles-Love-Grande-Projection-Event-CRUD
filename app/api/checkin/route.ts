@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { normalizeWhatsAppNumber } from '@/lib/phone'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,11 +11,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Le numéro WhatsApp et le nom sont requis.' }, { status: 400 })
     }
 
-    const whatsappT = String(whatsapp).trim()
+    const whatsappT = normalizeWhatsAppNumber(whatsapp)
     const nomT = String(nom).trim()
-    const phoneRegex = /^\+?[\d\s\-().]{8,20}$/
     
-    if (!phoneRegex.test(whatsappT)) {
+    if (!whatsappT) {
       return NextResponse.json({ error: 'Numéro WhatsApp invalide.' }, { status: 400 })
     }
 
