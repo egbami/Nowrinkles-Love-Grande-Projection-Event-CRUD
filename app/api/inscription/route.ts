@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Les 200 places sont prises. Les inscriptions sont closes.' }, { status: 403 })
     }
 
-    const existant = await prisma.participant.findUnique({ where: { whatsapp: whatsappT } })
+    const existant = await prisma.participant.findFirst({
+      where: { whatsapp: whatsappT },
+      orderBy: { createdAt: 'asc' },
+    })
     if (existant) {
       return NextResponse.json({ error: `Ce numéro est déjà inscrit sous le nom ${existant.prenom} ${existant.nom}.` }, { status: 409 })
     }

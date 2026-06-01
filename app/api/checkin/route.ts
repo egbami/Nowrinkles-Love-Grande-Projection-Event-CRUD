@@ -19,8 +19,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Chercher le participant
-    const participant = await prisma.participant.findUnique({ 
-      where: { whatsapp: whatsappT } 
+    const participant = await prisma.participant.findFirst({
+      where: { whatsapp: whatsappT },
+      orderBy: { createdAt: 'asc' },
     })
 
     if (!participant) {
