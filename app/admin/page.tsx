@@ -160,6 +160,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [reports, setReports] = useState<ReportFile[]>([])
   const [reportsLoading, setReportsLoading] = useState(true)
+  const [showQrModal, setShowQrModal] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchParticipants = useCallback(async (searchVal: string, pageVal: number) => {
@@ -444,6 +445,15 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Bouton QR Code */}
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="hidden sm:flex items-center gap-2 font-source text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200 hover:border-gold"
+            style={{ borderColor: 'rgba(28,28,46,0.2)', color: 'var(--graphite)' }}
+          >
+            QR Code
+          </button>
+
           {/* Bouton CSV */}
           <button
             onClick={exportCSV}
@@ -773,6 +783,41 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           )}
         </div>
       </main>
+
+      {/* ─── Modal QR Code ─────────────────────────────────────────────── */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ background: 'rgba(28,28,46,0.8)', backdropFilter: 'blur(4px)' }}>
+          <div className="p-8 max-w-sm w-full relative text-center border" style={{ background: 'var(--bg)', borderColor: 'rgba(28,28,46,0.1)' }}>
+            <button
+              onClick={() => setShowQrModal(false)}
+              className="absolute top-4 right-4 text-2xl leading-none transition-opacity hover:opacity-70"
+              style={{ color: 'var(--muted)' }}
+            >
+              &times;
+            </button>
+            <h3 className="font-playfair font-bold text-2xl mb-2" style={{ color: 'var(--graphite)' }}>QR Code Entrée</h3>
+            <p className="font-source text-sm mb-6" style={{ color: 'var(--muted)' }}>
+              Les participants peuvent scanner ce code à l&apos;entrée pour valider leur présence.
+            </p>
+            <div className="bg-white p-4 inline-block mx-auto mb-6">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/checkin' : '')}`}
+                alt="QR Code Checkin"
+                width={250}
+                height={250}
+              />
+            </div>
+            <a 
+              href={`https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/checkin' : '')}`} 
+              target="_blank" 
+              rel="noreferrer"
+              className="btn-primary w-full block text-center"
+            >
+              Agrandir / Imprimer
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
