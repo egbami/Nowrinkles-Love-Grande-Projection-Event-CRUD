@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 
 export default function CheckinPage() {
   const [whatsapp, setWhatsapp] = useState('')
+  const [nom, setNom] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{type: 'success' | 'info' | 'error', message: string} | null>(null)
 
@@ -23,7 +24,7 @@ export default function CheckinPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ whatsapp }),
+        body: JSON.stringify({ whatsapp, nom }),
       })
       
       const data = await res.json()
@@ -38,6 +39,7 @@ export default function CheckinPage() {
       } else {
         setResult({ type: 'success', message: data.message })
         setWhatsapp('')
+        setNom('')
       }
     } catch {
       setResult({ type: 'error', message: 'Erreur réseau. Reessayez dans quelques instants.' })
@@ -66,7 +68,7 @@ export default function CheckinPage() {
           Confirmez votre présence
         </h1>
         <p className="font-source text-sm text-center mb-8" style={{ color: 'var(--muted)' }}>
-          Entrez le numéro WhatsApp utilisé lors de votre inscription pour accéder à l&apos;événement.
+          Entrez votre nom et le numéro WhatsApp utilisé lors de votre inscription pour accéder à l&apos;événement.
         </p>
 
         {result && (
@@ -83,6 +85,26 @@ export default function CheckinPage() {
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div>
+            <label
+              htmlFor="nom"
+              className="block font-source text-xs tracking-[0.25em] uppercase mb-2"
+              style={{ color: 'var(--graphite)' }}
+            >
+              Votre Nom
+            </label>
+            <input
+              id="nom"
+              type="text"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              placeholder="Ex: Dupont"
+              className="input-field"
+              disabled={submitting}
+              required
+            />
+          </div>
+
           <div>
             <label
               htmlFor="whatsapp"

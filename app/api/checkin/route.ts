@@ -4,13 +4,14 @@ import { prisma } from '@/lib/prisma'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { whatsapp } = body
+    const { whatsapp, nom } = body
 
-    if (!whatsapp) {
-      return NextResponse.json({ error: 'Le numéro WhatsApp est requis.' }, { status: 400 })
+    if (!whatsapp || !nom) {
+      return NextResponse.json({ error: 'Le numéro WhatsApp et le nom sont requis.' }, { status: 400 })
     }
 
     const whatsappT = String(whatsapp).trim()
+    const nomT = String(nom).trim()
     const phoneRegex = /^\+?[\d\s\-().]{8,20}$/
     
     if (!phoneRegex.test(whatsappT)) {
@@ -26,6 +27,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ 
         error: 'Ce numéro n\'est pas sur la liste des inscrits. Veuillez vous rapprocher de l\'administration.' 
       }, { status: 404 })
+    }
+
+    // Sécurité : vérifier que le nom correspond (insensible à la casse)
+    if (participant.nom.toLowerCase() !== nomT.toLowerCase()) {
+      return NextResponse.json({ 
+        error: 'Les informations ne correspondent pas à nos registres.' 
+      }, { status: 403 })
     }
 
     // Vérifier s'il est déjà pointé
