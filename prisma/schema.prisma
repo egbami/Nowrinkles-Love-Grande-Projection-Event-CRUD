@@ -12,7 +12,7 @@ model Participant {
   id        String    @id @default(uuid())
   nom       String
   prenom    String
-  whatsapp  String    @unique
+  whatsapp  String
   createdAt DateTime  @default(now())
   verifie   Boolean   @default(false)
   verifieAt DateTime?

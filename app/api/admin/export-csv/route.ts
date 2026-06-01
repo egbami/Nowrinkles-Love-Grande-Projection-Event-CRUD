@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isAdminSession } from '@/lib/admin-auth'
+import { formatWhatsAppNumber } from '@/lib/phone'
 
 function isAdmin(req: NextRequest) {
   return isAdminSession(req.cookies.get('admin_session')?.value)
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
           p.id,
           `"${p.prenom}"`,
           `"${p.nom}"`,
-          `"${p.whatsapp}"`,
+          `"${formatWhatsAppNumber(p.whatsapp)}"`,
           `"${dateInscription}"`,
           p.verifie ? 'Oui' : 'Non',
           `"${dateVerif}"`,

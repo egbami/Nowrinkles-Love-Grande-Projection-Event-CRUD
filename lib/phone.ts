@@ -14,3 +14,6 @@ export function isValidWhatsAppNumber(input: string) {
   return normalizeWhatsAppNumber(input) !== null;
 }
 
+export function formatWhatsAppNumber(input: string) {
+  return normalizeWhatsAppNumber(input) ?? String(input || '').trim();
+}

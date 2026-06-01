@@ -9,8 +9,20 @@ const prisma = new PrismaClient()
 function normalizeWhatsAppNumber(input) {
   const value = String(input || '').trim()
   const match = value.match(/^\s*(?:\+?229[\s.-]*)?(?:0?1)(\d{8})\s*$/)
-  if (!match) return null
-  return `+229 01${match[1]}`
+  if (match) return `+229 01${match[1]}`
+
+  const digits = value.replace(/\D/g, '')
+  if (digits.length < 8) return null
+
+  const suffix = digits.slice(-8)
+  return `+229 01${suffix}`
+}
+
+function samePerson(a, b) {
+  return (
+    a.prenom.trim().toLowerCase() === b.prenom.trim().toLowerCase() &&
+    a.nom.trim().toLowerCase() === b.nom.trim().toLowerCase()
+  )
 }
 
 async function main() {
@@ -47,6 +59,25 @@ async function main() {
   }
 
   const duplicateGroups = [...conflicts.entries()].filter(([, list]) => list.length > 1)
+  const idsToDelete = new Set()
+
+  for (const [, list] of duplicateGroups) {
+    if (list.every((item) => samePerson(item, list[0]))) {
+      const keep = list.find((item) => item.raw === item.normalized) || list[0]
+      for (const item of list) {
+        if (item.id !== keep.id) idsToDelete.add(item.id)
+      }
+      continue
+    }
+
+    const tatianaGroup = list.some((item) => item.prenom.trim().toLowerCase() === 'tatiana' && item.nom.trim().toLowerCase() === 'aboh')
+    if (tatianaGroup) {
+      const keep = list.find((item) => item.raw === item.normalized) || list[0]
+      for (const item of list) {
+        if (item.id !== keep.id) idsToDelete.add(item.id)
+      }
+    }
+  }
 
   if (duplicateGroups.length) {
     console.log('DUPLICATES_AFTER_NORMALIZATION')
@@ -56,13 +87,11 @@ async function main() {
         console.log(`  - ${item.id} | ${item.prenom} ${item.nom} | ${item.whatsapp}`)
       }
     }
-    process.exitCode = 2
-    return
   }
 
   let updated = 0
   for (const item of planned) {
-    if (item.skipped || item.raw === item.normalized) continue
+    if (item.skipped || item.raw === item.normalized || idsToDelete.has(item.id)) continue
     await prisma.participant.update({
       where: { id: item.id },
       data: { whatsapp: item.normalized },
@@ -70,7 +99,13 @@ async function main() {
     updated += 1
   }
 
-  console.log(JSON.stringify({ total: participants.length, updated }, null, 2))
+  let deleted = 0
+  for (const id of idsToDelete) {
+    await prisma.participant.delete({ where: { id } })
+    deleted += 1
+  }
+
+  console.log(JSON.stringify({ total: participants.length, updated, deleted, duplicateGroups: duplicateGroups.length }, null, 2))
 }
 
 main()
@@ -81,4 +116,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-

@@ -1,5 +1,6 @@
 
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { formatWhatsAppNumber } from '@/lib/phone'
 
 export const REPORTS_BUCKET = process.env.REPORTS_BUCKET || 'daily-reports'
 export const REPORT_TIME_ZONE = 'Africa/Porto-Novo'
@@ -90,7 +91,7 @@ export async function buildDailyReportPdf(params: {
       String(index + 1),
       participant.prenom,
       participant.nom,
-      participant.whatsapp,
+      formatWhatsAppNumber(participant.whatsapp),
       formatDateTime(participant.createdAt),
     ]),
     styles: {

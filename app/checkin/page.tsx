@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 
+const PHONE_FORMAT = /^\+229 01\d{8}$/
+
 export default function CheckinPage() {
   const [whatsapp, setWhatsapp] = useState('')
   const [nom, setNom] = useState('')
@@ -15,6 +17,15 @@ export default function CheckinPage() {
 
     if (submitting) return
 
+    const normalizedWhatsapp = whatsapp.trim()
+    if (!PHONE_FORMAT.test(normalizedWhatsapp)) {
+      setResult({
+        type: 'error',
+        message: 'Le numéro doit obligatoirement être au format +229 01XXXXXXXX.',
+      })
+      return
+    }
+
     setSubmitting(true)
     setResult(null)
 
@@ -24,7 +35,7 @@ export default function CheckinPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ whatsapp, nom }),
+        body: JSON.stringify({ whatsapp: normalizedWhatsapp, nom }),
       })
       
       const data = await res.json()
@@ -69,6 +80,7 @@ export default function CheckinPage() {
         </h1>
         <p className="font-source text-sm text-center mb-8" style={{ color: 'var(--muted)' }}>
           Entrez votre nom et le numéro WhatsApp utilisé lors de votre inscription pour accéder à l&apos;événement.
+          Le numéro doit obligatoirement être au format <strong style={{ color: 'var(--graphite)' }}>+229 01XXXXXXXX</strong>.
         </p>
 
         {result && (
@@ -118,7 +130,8 @@ export default function CheckinPage() {
               type="tel"
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="+229 00 00 00 00"
+              pattern="\+229 01[0-9]{8}"
+              placeholder="+229 01XXXXXXXX"
               className="input-field"
               disabled={submitting}
               required

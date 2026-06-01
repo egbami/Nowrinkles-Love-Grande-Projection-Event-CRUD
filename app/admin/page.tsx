@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
+import { formatWhatsAppNumber } from '@/lib/phone'
 
 /* ─── Types ─────────────────────────────────────────────────────────────────── */
 interface Participant {
@@ -363,7 +364,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         String(i + 1),
         p.prenom,
         p.nom,
-        p.whatsapp,
+        formatWhatsAppNumber(p.whatsapp),
         formatDate(p.createdAt),
         p.verifie ? '✓' : '—',
       ])
@@ -629,7 +630,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   {p.nom}
                 </div>
                 <div className="col-span-3 hidden lg:block" style={{ color: 'var(--muted)' }}>
-                  {p.whatsapp}
+                  {formatWhatsAppNumber(p.whatsapp)}
                 </div>
                 <div className="col-span-2 hidden lg:block text-xs" style={{ color: 'var(--muted)' }}>
                   {formatDate(p.createdAt)}
