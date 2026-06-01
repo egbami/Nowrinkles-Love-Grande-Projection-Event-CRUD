@@ -131,7 +131,7 @@ export default function HomePage() {
                 Les inscriptions sont closes
               </p>
               <p className="font-source text-sm" style={{ color: 'var(--muted)' }}>
-                Merci pour votre intérêt. La date limite d'inscription est dépassée ou la capacité maximale a été atteinte.
+                Merci pour votre intérêt. La date limite d&apos;inscription est dépassée ou la capacité maximale a été atteinte.
               </p>
             </div>
           ) : (
@@ -198,7 +198,7 @@ export default function HomePage() {
                   </>
                 ) : (
                   <>
-                    <span>S'inscrire</span>
+                    <span>S&apos;inscrire</span>
                     <span>→</span>
                   </>
                 )}
