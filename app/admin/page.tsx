@@ -23,6 +23,12 @@ interface PageData {
   totalPages: number
 }
 
+interface AdminStats {
+  total: number
+  confirmed: number
+  pending: number
+}
+
 interface ReportFile {
   name: string
   createdAt?: string
@@ -156,6 +162,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [page, setPage]         = useState(1)
   const [loading, setLoading]   = useState(true)
   const [total, setTotal]       = useState(0)
+  const [stats, setStats]       = useState<AdminStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -164,8 +172,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [showQrModal, setShowQrModal] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const fetchParticipants = useCallback(async (searchVal: string, pageVal: number) => {
-    setLoading(true)
+  const fetchParticipants = useCallback(async (searchVal: string, pageVal: number, showLoading = false) => {
+    if (showLoading) setLoading(true)
+
     try {
       const params = new URLSearchParams({
         page:   String(pageVal),
@@ -187,11 +196,37 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }
   }, [onLogout])
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/stats', { cache: 'no-store' })
+      if (res.status === 401) {
+        onLogout()
+        return
+      }
+
+      const json = await res.json()
+      if (res.ok) {
+        setStats(json)
+      }
+    } catch {
+      // silencieux
+    } finally {
+      setStatsLoading(false)
+    }
+  }, [onLogout])
+
   useEffect(() => {
-    fetchParticipants(search, page)
-    const interval = setInterval(() => fetchParticipants(search, page), 30_000)
-    return () => clearInterval(interval)
-  }, [fetchParticipants, search, page])
+    fetchParticipants(search, page, true)
+    fetchStats()
+
+    const participantInterval = setInterval(() => fetchParticipants(search, page), 30_000)
+    const statsInterval = setInterval(() => fetchStats(), 5_000)
+
+    return () => {
+      clearInterval(participantInterval)
+      clearInterval(statsInterval)
+    }
+  }, [fetchParticipants, fetchStats, search, page])
 
   const fetchReports = useCallback(async () => {
     setReportsLoading(true)
@@ -220,7 +255,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     setSearch(val)
     setPage(1)
     if (searchTimer.current) clearTimeout(searchTimer.current)
-    searchTimer.current = setTimeout(() => fetchParticipants(val, 1), 400)
+    searchTimer.current = setTimeout(() => fetchParticipants(val, 1, true), 400)
   }
 
   const handleLogout = async () => {
@@ -261,6 +296,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       toast.success(
         participant.verifie ? 'Participant marqué non vérifié.' : 'Participant vérifié.'
       )
+
+      fetchStats()
     } catch {
       toast.error('Erreur réseau pendant la mise à jour.')
     } finally {
@@ -314,8 +351,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       if (isLastItemOnPage && page > 1) {
         setPage((current) => Math.max(1, current - 1))
       } else {
-        fetchParticipants(search, page)
+        fetchParticipants(search, page, true)
       }
+
+      fetchStats()
     } catch {
       toast.error('Erreur réseau pendant la suppression.')
     } finally {
@@ -417,7 +456,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   }
 
   const MAX = 200
-  const pct = total > 0 ? Math.round((total / MAX) * 100) : 0
+  const totalParticipants = stats?.total ?? total
+  const pct = totalParticipants > 0 ? Math.round((totalParticipants / MAX) * 100) : 0
+  const confirmedCount = stats?.confirmed ?? 0
+  const pendingCount = stats?.pending ?? Math.max(0, totalParticipants - confirmedCount)
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -491,10 +533,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         {/* ─── Statistiques ────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: 'Inscrits', value: total,        color: 'var(--graphite)' },
-            { label: 'Places restantes', value: Math.max(0, MAX - total), color: 'var(--lavender)' },
-            { label: 'Capacité', value: `${pct}%`,   color: 'var(--gold)' },
-            { label: 'Maximum',  value: MAX,           color: 'var(--muted)' },
+            { label: 'Inscrits', value: totalParticipants, color: 'var(--graphite)' },
+            { label: 'Confirmés', value: statsLoading ? '...' : confirmedCount, color: 'var(--gold)' },
+            { label: 'En attente', value: statsLoading ? '...' : pendingCount, color: 'var(--lavender)' },
+            { label: 'Places restantes', value: Math.max(0, MAX - totalParticipants), color: 'var(--muted)' },
           ].map(({ label, value, color }) => (
             <div
               key={label}
@@ -529,6 +571,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             <span>{pct}% rempli</span>
             <span>200 max</span>
           </div>
+          <p className="mt-2 font-source text-xs" style={{ color: 'var(--muted)' }}>
+            Confirmés: {statsLoading ? '...' : confirmedCount}
+          </p>
         </div>
 
         {/* ─── Recherche + actions mobile ──────────────────────────────── */}
@@ -714,7 +759,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <p className="font-source text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>
             Un rapport PDF est généré automatiquement chaque jour à <strong style={{ color: 'var(--graphite)' }}>06h00</strong> heure Afrique de l&apos;Ouest.
             Vous pouvez aussi générer manuellement un PDF ou un CSV via les boutons en haut de page.
-            Le tableau ci-dessus se rafraîchit automatiquement toutes les 30 secondes.
+            Le tableau ci-dessus se rafraîchit automatiquement toutes les 30 secondes et le compteur de confirmés toutes les 5 secondes.
           </p>
         </div>
 

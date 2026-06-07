@@ -79,7 +79,7 @@ export default function CheckinPage() {
           Confirmez votre présence
         </h1>
         <p className="font-source text-sm text-center mb-8" style={{ color: 'var(--muted)' }}>
-          Entrez votre prénom et le numéro WhatsApp utilisé lors de votre inscription pour accéder à l&apos;événement.
+          Entrez votre nom et le numéro WhatsApp utilisé lors de votre inscription pour accéder à l&apos;événement.
           Le numéro doit obligatoirement être au format <strong style={{ color: 'var(--graphite)' }}>+229 01XXXXXXXX</strong>.
         </p>
 
